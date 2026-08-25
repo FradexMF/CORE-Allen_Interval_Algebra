@@ -1,0 +1,112 @@
+%!TEX root = ../main/main.tex
+
+\paragraph{Sets and intervals} Given a set $A$, we denote by $2^{A}$ the $\textit{powerset}$ of $A$. We denote by $\mathbb{N}$ the natural numbers. Given $n,m \in \mathbb{N}$ with $n \leq m$, we denote by $[n]$ the set $\{1,\dots,n\}$ and by $[n..m]$ the interval $\{n,n+1,\dots,m\}$ over $\mathbb{N}$. %We denote by $\mathbb{Q}_{\geq 0}$ the non-negative rational numbers, and by $\mathbb{Q}_{\geq 0}^\infty$ the set $\mathbb{Q}_{\geq 0} \cup \{\infty\}$ where $q < \infty$ for every $q \in \mathbb{Q}_{\geq 0}$. A subset $I \subseteq \mathbb{Q}_{\geq 0}$ is an \textit{interval over} $\mathbb{Q}_{\geq 0}$ if for every $p, q \in I$ and $r \in \mathbb{Q}_{\geq 0}$, if $p \leq r \leq q$, then $r \in I$. We will use the standard notation for specifying intervals over $\mathbb{Q}_{\geq 0}$, namely, as pairs in $\mathbb{Q}_{\geq 0} \times \mathbb{Q}_{\geq 0}^\infty$ with squared or circled brackets.
+
+\paragraph{Events and streams} We fix a set $\SETT$ of \textit{event types}, a set $\SETA$ of \textit{attributes names}, and a set $\SETD$ of \textit{data values} (e.g., integers, floats, strings). An \textit{event} $e$ is a partial mapping $e \colon \SETA \to \SETD$ that maps attributes names in $\SETA$ to data values in $\SETD$. We denote $\att(e)$ the domain of $e$, called the attributes of $e$, and we assume that $\att(e)$ is finite. We denote by $e(A)$ the data value of the attribute $A \in \SETA$ whenever $A \in \att(e)$. Further, each event $e$ has a type in $\SETT$ denoted by $\type(e)$. We write $\SETE$ to denote the set of all events over event types $\SETT$, attributes names $\SETA$, and data values $\SETD$.
+
+A \textit{stream} is an (arbitrary long) sequence $\Stream = e_1 e_2 \dots e_n$ of events where $|\Stream| = n$ is the length of the stream.
+
+\paragraph{Complex events} Fix a finite set $\SETX$ of variables and assume that $\SETT \subseteq \SETX$, where $\SETT$ is the set of event types as defined earlier, this is to say that all event types are a variable. Let $\Stream$ be a stream of length $n$. A complex event of $\Stream$ is a triple $(i, j, \mu)$ where $i, j \in [n]$, $i \leq j$, and $\mu \colon \SETX \to 2^{[i..j]}$ is a function with finite domain. Intuitively, $i$ and $j$ marks the beginning and end of the interval where the complex event happens, and $\mu$ stores the events in the interval $[i..j]$ that fired the complex event. In the following, we will usually use $C$ to denote a complex event $(i, j, \mu)$ of $\Stream$ and omit $\Stream$ if the stream is clear from the context. We will use $\cinterval(C)$, $\cstart(C)$, and $\cend(C)$ to denote the interval $[i..j]$, the start $i$, and the end $j$ of $C$, respectively.
+
+Further, by some abuse of notation we will also use $C(X)$ for $X \in \SETX$ to denote the set $\mu(X)$ of $C$.
+
+The following operations on complex events will be useful throughout the paper. We define the union of complex events $C_1$ and $C_2$, denoted by $C_1 \cup C_2$, as the complex event $C'$ such that $\cstart(C') = \min\{\cstart(C_1), \cstart(C_2)\}$, $\cend(C') = \max\{\cend(C_1), \cend(C_2)\}$, and $C'(X) = C_1(X) \cup C_2(X)$ for every $X \in \SETX$. Further, we define the \textit{projection over} $L$ of a complex event $C$, denoted by $\pi_L(C)$, as the complex event $C'$ such that $\cinterval(C') = \cinterval(C)$ and $C'(X) = C(X)$ whenever $X \in L$, and $C'(X) = \emptyset$, otherwise. Finally, we denote by $(i, j, \mu_\emptyset)$ the complex event with trivial mapping $\mu_\emptyset$ such that $\mu_\emptyset(X) = \emptyset$ for every $X \in \SETX$.
+
+\paragraph{Predicate of events} A \textit{predicate} is a possibly infinite set $\SETP$ of events. We say that an event $e$ satisfies predicate $P$, denoted $e \vDash P$, if, and only if, $e \in P$. We generalize this notation from events to a set of events $E$ such that $E \vDash P$ if, and only if, $e \vDash P$ for every $e \in E$. We assume a fixed set of predicates $\SETP$. Further, we assume that there is a basic set of predicates $\Pbasic \subseteq \SETP$ and $\SETP$ is the closure of $\Pbasic$ under intersection and negation (i.e., $P_1 \cap P_2 \in \SETP$ and $\SETE \setminus P \in \SETP$ for every $P, P_1, P_2 \in \SETP$) where $\SETE$ is a predicate in $\SETP$, that we usually denote by true.
+
+\paragraph{Complex event logic} In this work, we use the Complex Event Logic (CEL) introduced in [21] and implemented in CORE [11] as our basic query language for CER. The syntax of a CEL formula $\varphi$ is given by the grammar:
+\[
+\makebox[\textwidth][s]{$
+	\varphi := R \; \big|\; \varphi \text{ AS } X 
+	\; \big|\; \varphi \text{ FILTER } X[P]
+	\; \big|\; \varphi \text{ OR } \varphi
+	\; \big|\; \varphi \text{ AND } \varphi
+	\; \big|\; \varphi ; \varphi
+	\; \big|\; \varphi : \varphi
+	\; \big|\; \varphi{+}
+	\; \big|\; \varphi{\oplus}
+	\; \big|\; \pi_L(\varphi)
+	$}
+\]
+where $R \in \SETT$ is an event type, $X \in \SETX$ is a variable, $P \in \SETP$ is a predicate, and $L \subseteq \SETX$ is a set of variables.  We define the semantics of a CEL formula $\varphi$ over a stream $\Stream$, recursively, as a set of complex events over $\Stream$ In Figure 1, we define the semantics of each CEL operator like in~[11, 21].
+\cristian{TODO: agregar las citas con bibtex.}
+
+\begin{figure}[t]
+\[
+\begin{aligned}
+	\text{\textlbrackdbl} R \text{\textrbrackdbl}(\Stream) 
+	&= \{\, (i, i, \mu)
+	\mid \text{type}(e_i) = R 
+	\land \mu(R) = \{i\} 
+	\land \forall X \neq R.\ \mu(X) = \emptyset \,\} \\
+	\text{\textlbrackdbl} \varphi\ \text{AS}\ X \text{\textrbrackdbl}(\Stream) 
+	&= \{\, C 
+	\mid \exists C' \in \text{\textlbrackdbl} \varphi \text{\textrbrackdbl}(\Stream).\
+	\text{interval}(C) = \text{interval}(C') 
+	\land C(X) = {\bigcup}_Y C'(Y) \\& \hspace{30pt}	
+	\land \forall Z \neq X.\ C(Z) = C'(Z) \,\} \\
+	\text{\textlbrackdbl} \varphi\ \text{FILTER}\ X[P] \text{\textrbrackdbl}(\Stream) 
+	&= \{\, C 
+	\mid C \in \text{\textlbrackdbl} \varphi \text{\textrbrackdbl}(\Stream) 
+	\land C(X) \models P \,\} \\
+	\text{\textlbrackdbl} \varphi_1\ \text{OR}\ \varphi_2 \text{\textrbrackdbl}(\Stream) 
+	&= \text{\textlbrackdbl} \varphi_1 \text{\textrbrackdbl}(\Stream) 
+	\cup 
+	\text{\textlbrackdbl} \varphi_2 \text{\textrbrackdbl}(\Stream) \\
+	\text{\textlbrackdbl} \varphi_1\ \text{AND}\ \varphi_2 \text{\textrbrackdbl}(\Stream) 
+	&= \text{\textlbrackdbl} \varphi_1 \text{\textrbrackdbl}(\Stream) 
+	\cap 
+	\text{\textlbrackdbl} \varphi_2 \text{\textrbrackdbl}(\Stream) \\
+	\text{\textlbrackdbl} \varphi_1 ; \varphi_2 \text{\textrbrackdbl}(\Stream) 
+	&= \{\, C_1 \cup C_2 
+	\mid C_1 \in \text{\textlbrackdbl} \varphi_1 \text{\textrbrackdbl}(\Stream) 
+	\land C_2 \in \text{\textlbrackdbl} \varphi_2 \text{\textrbrackdbl}(\Stream)
+	\land \text{end}(C_1) < \text{start}(C_2) \,\} \\
+	\text{\textlbrackdbl} \varphi_1 : \varphi_2 \text{\textrbrackdbl}(\Stream) 
+	&= \{\, C_1 \cup C_2 
+	\mid C_1 \in \text{\textlbrackdbl} \varphi_1 \text{\textrbrackdbl}(\Stream) 
+	\land C_2 \in \text{\textlbrackdbl} \varphi_2 \text{\textrbrackdbl}(\Stream)
+	\land \text{end}(C_1) + 1 = \text{start}(C_2) \,\} \\
+	\text{\textlbrackdbl} \varphi^{+} \text{\textrbrackdbl}(\Stream) 
+	&= \text{\textlbrackdbl} \varphi \text{\textrbrackdbl}(\Stream) 
+	\cup 
+	\text{\textlbrackdbl} \varphi ; \varphi^{+} \text{\textrbrackdbl}(\Stream) \\
+	\text{\textlbrackdbl} \varphi^{\oplus} \text{\textrbrackdbl}(\Stream) 
+	&= \text{\textlbrackdbl} \varphi \text{\textrbrackdbl}(\Stream) 
+	\cup 
+	\text{\textlbrackdbl} \varphi : \varphi^{\oplus} \text{\textrbrackdbl}(\Stream) \\
+	\text{\textlbrackdbl} \pi_{L}(\varphi) \text{\textrbrackdbl}(\Stream) 
+	&= \{\, \pi_L(C) 
+	\mid C \in \text{\textlbrackdbl} \varphi \text{\textrbrackdbl}(\Stream) \,\}
+\end{aligned}
+\]
+
+\caption{Figure 1: The semantics of CEL formulas defined over a stream $\Stream = e_1 e_2\dots e_n$ where each $e_i$ is an event.}
+\end{figure}
+
+\paragraph{Complex Event Automata with $\epsilon$-transitions} A \textit{Complex Event Automata} (CEA) (with $\epsilon$-transitions) is a tuple $
+\mathcal{A} = (Q,\textbf{P},\textbf{X},\Delta,q_0,F)
+$
+where $Q$ is a finite set of states, $\SETP$ is the set of predicates, $\SETX$ is a finite set of variables,
+\[
+\Delta \subseteq Q \times (\SETP \times 2^{\SETX} \cup \{\epsilon\}) \times Q  
+\] is a finite relation (called the transition relation), $q_0 \in Q$ is the inital state, and $F$ is the set of final states. A transition of the form $(p, P, L, q)$ is a \emph{reading transition} and a transition of the form $(p, \epsilon, q)$ is an \emph{$\epsilon$-transition}. As usual, the automaton can change its state without consuming any event of the stream by using an $\epsilon$-transition.
+
+Let $\Stream = e_1 e_2 \ldots e_n$ be a stream. A configuration of $\cA$ over $\Stream$ is a pair $(q, i) \in Q \times [n]$.
+A run $\rho$ of $\cA$ over the stream $\Stream = e_1 e_2 \dots e_n$ from position $i$ to $j$ with $i, j \in [n]$ and $i \leq j$ is a sequence of configurations and transitions of the form:
+\[ 
+\rho := (p_1, i_1) \xrightarrow{t_1} (p_{2}, i_2) \xrightarrow{t_2} \dots \xrightarrow{t_k} (p_{k+1}, i_{k+1}) 
+\]
+such that $t_\ell \in \SETP \times 2^{\SETX} \cup \{\epsilon\}$ for every $\ell \in [k]$, $p_1 = q_0$, $i_1 = i$, $i_{k+1} = j+1$, and, for every $\ell \in [k]$:
+\begin{itemize}
+	\item if $t_\ell = (P, L)$, then $i_{\ell+1} = i_{\ell}+1$, $(p_{\ell}, P, L, p_{\ell+1}) \in \Delta$ and $e_{i_{\ell}} \vDash P$;
+	\item if $t_\ell = \epsilon$, then $i_{\ell+1} = i_{\ell}$ and $(p_{\ell}, \epsilon, p_{\ell+1}) \in \Delta$.
+\end{itemize}
+We say that the run is accepting if $p_{k+1} \in F$.
+For $t \in (\SETP \times 2^{\SETX} \cup \{\epsilon\})$ and $\ell \in [n]$ we define the complex event $\ce(t, \ell)$ of $\Stream$ such that $\ce(t, \ell) = (\ell, \ell, \{X \mapsto \{\ell\} \mid X \in L\})$ if $t = (P,L)$ and $(\ell, \ell, \emptyset)$, otherwise.
+Then a run $\rho$ from positions $i$ to $j$ like above defines the complex event $C_\rho$ such that:
+\[
+C_\rho := \ce(t_1, i_1) \cup \ce(t_2, i_2) \cup \dots \cup \ce(t_k, i_k)
+\]
+Note that when $t_\ell = \epsilon$, then the transition captures no event, but when $t_\ell = (P, L)$ the transition captures the event $e_{i_\ell}$ in each variable $X \in L$. We define the set of all complex events of $\cA$ over $\Stream$ as:  
+\[ \sem{\cA}(\Stream) = \{C_\rho \mid \rho \text{ is an accepting run of } \cA \text{ over } \Stream\} \]

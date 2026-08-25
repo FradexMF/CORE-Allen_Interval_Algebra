@@ -1,0 +1,71 @@
+% !TeX spellcheck = en_GB
+%!TEX root = ../main/main.tex
+In this section we introduce an extension to the semantics of CEL, namely we introduce a new operator using \textit{Allen interval algebra} \textit{during}.
+We then extend the formal computational model for evaluating CEL formulas and prove its correctness.
+
+We present then the \emph{during operator} for CEL with the following definition:
+
+
+$$\begin{aligned} 	\sem{\varphi_1 \during \varphi_2}(\Stream) 	&= \{C_1 \cup C_2 \mid C_1 \in \sem{\varphi_1}(\Stream)  	\land C_2 \in \sem{\varphi_2}(\Stream) \\ 	&\quad \land \cstart(C_1) < \cstart(C_2) \land \cend(C_2) < \cend(C_1)\} \end{aligned}$$
+
+\begin{example} Suppose we have a system monitoring server maintenance, specifically tracking the start and end of a maintenance window ($M$), and the start and end of a database backup ($B$). Consider a stream $\Stream = e_1 e_2 e_3 e_4$ where the event types are $\type(e_1) = M$, $\type(e_2) = B$, $\type(e_3) = B$, and $\type(e_4) = M$.
+Let $\varphi_1 = M ; M$ be a formula detecting the full maintenance window, and $\varphi_2 = B ; B$ be a formula detecting the database backup process.
+\begin{itemize}
+	\item The set $\sem{\varphi_1}(\Stream)$ contains a complex event $C_1$ representing the maintenance sequence at positions $1$ and $4$, with $\cinterval(C_1) = [1..4]$. Thus, $\cstart(C_1) = 1$ and $\cend(C_1) = 4$.
+	\item The set $\sem{\varphi_2}(\Stream)$ contains a complex event $C_2$ representing the backup sequence at positions $2$ and $3$, with $\cinterval(C_2) = [2..3]$. Thus, $\cstart(C_2) = 2$ and $\cend(C_2) = 3$.
+\end{itemize}
+
+Since the during condition $\cstart(C_1) < \cstart(C_2)$ and $\cend(C_2) < \cend(C_1)$ holds (i.e., $1 < 2$ and $3 < 4$), the complex event $C = C_1 \cup C_2$ is in the result of $\sem{\varphi_1 \during \varphi_2}(\Stream)$. This resulting complex event captures a scenario where a database backup is executed entirely during a maintenance window, starting strictly after the maintenance begins and finishing strictly before the maintenance ends.
+
+\end{example}
+
+We denote by $\celplus{\duringsimb}$ the \emph{extension of CEL} with the during operation. We can prove the following result:
+
+\begin{theorem} \label{theo:mytheorem}
+	For every $\celplus{\duringsimb}$ formula $\varphi$ there exists a CEA $\cA_\varphi$ such that $\sem{\varphi}(\Stream) = \sem{\cA_\varphi}(\Stream)$ for every stream $\Stream$.
+\end{theorem}
+
+\begin{proof}
+	We already know that for every (standard) CEL operator we can construct an equivalent CEA. So, we concentrate next in the construction of a CEA for the during operator.
+	Let $\varphi_1$ and $\varphi_2$ be formulas in CEL extended with the during operator. We show by induction that there exists a CEA $\cAduring$ such that:
+	
+	
+	$$\sem{\varphi_1 \during \varphi_2}(\Stream) = \sem{\cAduring}(\Stream)$$
+	
+	
+	Assume then that there exist CEAs that satisfy the previous property for $\varphi_1$ and $\varphi_2$, called $\cA_{\varphi_1} = (Q_1, \SETP_1, \SETX_1, \Delta_1, q_0, F_1)$ and $\cA_{\varphi_2} = (Q_2, \SETP_2, \SETX_2, \Delta_2, p_0, F_2)$, respectively.
+	Then the construction for the during operator is as follows.
+	Let $\cAduring$ be a CEA where $\cAduring = (\Qduring, \Pduring, \Xduring, \Dduring, I_{\during}, F_{\during})$:
+	
+	
+	$$\begin{aligned}[t] 		
+		& \Qduring = (Q_1 \times \{0, 1\}) \uplus (Q_1 \times Q_2 \times \{0, 1\}) \uplus (Q_1 \times \{2, 3\}) \\ 		
+		& \Pduring = \SETP_1 \cup \{ P_1 \land P_2 \mid P_1 \in \SETP_1 \land P_2 \in \SETP_2 \} \hspace*{155px}\\ 		
+		& \Xduring  = \SETX_1 \cup \SETX_2 \\ 		
+		& I_{\during} = (q_0, 0) \text{ where } q_0 \text{ is the initial state of }\cA_{\varphi_1}.\\ 		
+		& F_{\during} = \{ (q, 3) \mid q \in F_1 \}. 	\end{aligned}$$
+	
+	
+	The transition relation $\Dduring$ is formally defined as:
+	
+	
+	$$\begin{aligned}[t] 		
+		\Dduring & = \{((q,b), \epsilon, (q',b)) \mid (q,\epsilon,q') \in \Delta_1 \land b \in \{0, 1, 2, 3\}\} \\ 		
+		& \uplus \{((q,0), P_1, L_1, (q', 1)) \mid (q,P_1, L_1,q') \in \Delta_1\} \\ 		
+		& \uplus \{((q,1), P_1, L_1, (q', 1)) \mid (q,P_1, L_1,q') \in \Delta_1\} \\ 		
+		& \uplus \{((q,1), \epsilon, (q, p_0, 0)) \mid q \in Q_1 \} \\ 		
+		& \uplus \{((q, p, b), \epsilon, (q', p, b)) \mid (q, \epsilon, q') \in \Delta_1 \land p \in Q_2 \land b \in \{0, 1\}\}  \\ 		
+		& \uplus \{((q, p, b), \epsilon, (q, p', b)) \mid q \in Q_1 \land (p, \epsilon, p') \in \Delta_2 \land b \in \{0, 1\}\}  \\ 		
+		& \uplus \{((q, p, b), P_1 \land P_2, L_1 \cup L_2, (q', p', 1)) \mid (q, P_1, L_1, q') \in \Delta_1 \land (p, P_2, L_2, p') \in \Delta_2 \land b \in \{0, 1\}\} \\ 		
+		& \uplus \{((q, p, 1), \epsilon, (q, 2)) \mid p \in F_2 \land q \in Q_1\} \\ 		
+		& \uplus \{((q,2), P_1, L_1, (q', 3)) \mid (q,P_1, L_1,q') \in \Delta_1\} \\ 		
+		& \uplus \{((q,3), P_1, L_1, (q', 3)) \mid (q,P_1, L_1,q') \in \Delta_1\} 	\end{aligned}$$
+	
+	Intuitively, given a stream $\Stream$, $\cAduring$ first evaluates $\varphi_1$ alone. Because $\cstart(C_1) < \cstart(C_2)$, it forces $\cA_{\varphi_1}$ to consume at least one event, then it can transition to evaluate both simultaneously. Once $\cA_{\varphi_2}$ is done, we jump back to the first and since $\cend(C_2) < \cend(C_1)$, $\cA_{\varphi_1}$ it must consume at least one more event before finishing.
+	
+	Next, we prove that the construction is correct, namely, $\sem{\varphi_1 \during \varphi_2}(\Stream) = \sem{\cAduring}(\Stream)$ for every stream $\Stream$. The proof is by double containment.
+	
+	\paragraph{$\sem{\varphi_1 \during \varphi_2}(\Stream) \subseteq \sem{\cAduring}(\Stream)$}
+	
+	\paragraph{$\sem{\cAduring}(\Stream) \subseteq \sem{\varphi_1 \during \varphi_2}(\Stream)$}
+\end{proof}

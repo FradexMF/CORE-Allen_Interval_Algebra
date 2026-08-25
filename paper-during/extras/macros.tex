@@ -1,0 +1,129 @@
+%!TEX root = ../main/main.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			PACKAGES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+\usepackage{xspace}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{MnSymbol}
+\usepackage{mathtools}
+\usepackage{textcomp}
+\usepackage{stmaryrd}
+\usepackage{varwidth}
+\usepackage{graphicx}
+\usepackage{mathrsfs} 
+
+\usepackage{tikz}
+\usetikzlibrary{automata, graphs,positioning,chains,arrows,snakes,decorations.pathmorphing}
+
+%%%% TO CENTER THE EQUATIONS IN LIPICS
+\makeatletter
+\@fleqnfalse
+\@mathmargin\@centering
+\makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			COMMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{todonotes}
+\newcommand{\Fernando}[1]{\todo[inline, color=violet!20]{{\bf Fernando:} #1}}
+\newcommand{\cristian}[1]{\todo[inline, color=red!20]{{\bf Cristian:} #1}}
+
+%IF YOU WANT TO REMOVE COMMENTS, UNCOMMENT THE NEXT LINES
+%\renewcommand{\martin}[1]{}
+%\renewcommand{\cristian}[1]{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			SETS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\cD}{\mathcal{D}}
+
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\bbZ}{\mathbb{Z}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			ENVIROMENTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\paragraph}[1]{\smallskip
+	\noindent\textbf{#1}.}
+	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			Streams, CER 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\cA}{\mathcal{A}}
+
+\newcommand{\Stream}{\bar{S}}
+\newcommand{\cstart}{\operatorname{start}}
+\newcommand{\cend}{\operatorname{end}}
+\newcommand{\cinterval}{\operatorname{interval}}
+\newcommand{\Pbasic}{\mathbf{P}_{\operatorname{basic}}}
+\newcommand{\att}{\operatorname{att}}
+\newcommand{\type}{\operatorname{type}}
+\newcommand{\ce}{\operatorname{ce}}
+
+\newcommand{\SETT}{\mathbf{T}}
+\newcommand{\SETA}{\mathbf{A}}
+\newcommand{\SETD}{\mathbf{D}}
+\newcommand{\SETX}{\mathbf{X}}
+\newcommand{\SETE}{\mathbf{E}}
+\newcommand{\SETP}{\mathbf{P}}
+\newcommand{\SETL}{\mathbf{L}}
+
+\newcommand{\sem}[1]{\text{\textlbrackdbl} #1 \text{\textrbrackdbl}}
+
+\newcommand{\overlapsimb}{\text{:o}}
+\newcommand{\overlap}{~\overlapsimb~}
+\newcommand{\cAoverlap}{\cA_{\overlapsimb}}
+\newcommand{\Qoverlap}{Q_{\overlapsimb}}
+\newcommand{\Poverlap}{\SETP_{\overlapsimb}}
+\newcommand{\Xoverlap}{\SETX_{\overlapsimb}}
+\newcommand{\Doverlap}{\Delta_{\overlapsimb}}	
+\newcommand{\celplus}[1]{\text{CEL} \cup \{#1\}}
+
+\newcommand{\startssimb}{\text{:s}}
+\newcommand{\starts}{~\startssimb~}
+\newcommand{\cAstarts}{\cA_{\startssimb}}
+\newcommand{\Qstarts}{Q_{\startssimb}}
+\newcommand{\Pstarts}{\SETP_{\startssimb}}
+\newcommand{\Xstarts}{\SETX_{\startssimb}}
+\newcommand{\Dstarts}{\Delta_{\startssimb}}	
+
+\newcommand{\duringsimb}{\text{:d}}
+\newcommand{\during}{~\duringsimb~}
+\newcommand{\cAduring}{\cA_{\duringsimb}}
+\newcommand{\Qduring}{Q_{\duringsimb}}
+\newcommand{\Pduring}{\SETP_{\duringsimb}}
+\newcommand{\Xduring}{\SETX_{\duringsimb}}
+\newcommand{\Dduring}{\Delta_{\duringsimb}}	
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%			ALGORITHMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\operatorname}[1]{\mathsf{#1}}
+
+\algrenewcommand\algorithmicindent{1.3em}%
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+
+
+
