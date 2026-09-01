@@ -43,7 +43,7 @@ We denote by $\celplus{\startssimb}$ the \emph{extension of CEL} with the starts
 	
 	The transition relation $\Dstarts$ is formally defined as:
 	
-	
+	\Fernando{dejar todos estrictos}
 	$$\begin{aligned}[t] 		\Dstarts & = \Delta_2\\ 		& \uplus \{((q, p, b), P_1 \land P_2, L_1 \cup L_2, (q', p', 1)) \mid (q, P_1, L_1, q') \in \Delta_1 \land (p, P_2, L_2, p') \in \Delta_2 \land b \in \{0, 1\}\} \\ 		& \uplus \{((q, p, b), \epsilon, (q', p, b)) \mid (q, \epsilon, q') \in \Delta_1 \land p \in Q_2 \land b \in \{0, 1\}\}  \\ 		& \uplus \{((q, p, b), \epsilon, (q, p', b)) \mid q \in Q_1 \land (p, \epsilon, p') \in \Delta_2 \land b \in \{0, 1\}\}  \\ 		& \uplus \{((q, p, 1), \epsilon, p) \mid q \in F_1 \land p \in Q_2\} 	\end{aligned}$$
 	
 	Intuitively, given a stream $\Stream$, we evaluate $\varphi_1$ and $\varphi_2$ simultaneously from the beginning. At some point when $\varphi_1$ reaches a final state (ensuring at least one joint event was consumed), we transition out of the product phase and continue evaluating only $\varphi_2$ until it reaches its own final state.
