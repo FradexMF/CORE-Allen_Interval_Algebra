@@ -6,7 +6,7 @@ We then extend the formal computational model for evaluating CEL formulas and pr
 We present then the \emph{starts operator} for CEL with the following definition:
 
 
-$$\begin{aligned} 	\sem{\varphi_1 \starts \varphi_2}(\Stream) 	&= \{C_1 \cup C_2 \mid C_1 \in \sem{\varphi_1}(\Stream)  	\land C_2 \in \sem{\varphi_2}(\Stream) \\ 	&\quad \land \cstart(C_1) = \cstart(C_2) \land \cend(C_1) < \cend(C_2)\} \end{aligned}$$
+$$\begin{aligned} 	\sem{\varphi_1 \starts \varphi_2}(\Stream) 	&= \{C_1 \cup C_2 \mid C_1 \in \sem{\varphi_1}(\Stream)  	\land C_2 \in \sem{\varphi_2}(\Stream) \\ 	&\quad \land \cstart(C_1) = \cstart(C_2) \land \cend(C_1) \leq \cend(C_2)\} \end{aligned}$$
 
 \begin{example} Suppose we have a system monitoring server health, specifically tracking system errors ($E$), CPU stabilization ($C$), and Memory stabilization ($M$). Consider a stream $\Stream = e_1 e_2 e_3$ where the event types are $\type(e_1) = E$, $\type(e_2) = C$, and $\type(e_3) = M$.
 
@@ -38,13 +38,23 @@ We denote by $\celplus{\startssimb}$ the \emph{extension of CEL} with the starts
 	Let $\cAstarts$ be a CEA where $\cAstarts = (\Qstarts, \Pstarts, \Xstarts, \Dstarts, I_{\starts}, F_{\starts})$:
 	
 	
-	$$\begin{aligned}[t] 		& \Qstarts = Q_2 \uplus (Q_1 \times Q_2 \times \{0, 1\}) \\ 		& \Pstarts = \SETP_2 \cup \{ P_1 \land P_2 \mid P_1 \in \SETP_1 \land P_2 \in \SETP_2 \} \hspace*{155px}\\ 		& \Xstarts  = \SETX_1 \cup \SETX_2 \\ 		& I_{\starts} = (q_0, p_0, 0) \text{ where } q_0 \text{ and } p_0 \text{ are the initial states of } \cA_{\varphi_1} \text{ and } \cA_{\varphi_2}.\\ 		& F_{\starts} = F_2 \text{ the final states of } \cA_{\varphi_2}. 	\end{aligned}$$
+	$$\begin{aligned}[t] 		
+		& \Qstarts = Q_2 \uplus (Q_1 \times Q_2 \times \{0, 1\}) \\ 		
+		& \Pstarts = \SETP_2 \cup \{ P_1 \land P_2 \mid P_1 \in \SETP_1 \land P_2 \in \SETP_2 \} \hspace*{155px}\\ 		
+		& \Xstarts  = \SETX_1 \cup \SETX_2 \\ 		
+		& I_{\starts} = (q_0, p_0, 0) \text{ where } q_0 \text{ and } p_0 \text{ are the initial states of } \cA_{\varphi_1} \text{ and } \cA_{\varphi_2}.\\ 		
+		& F_{\starts} = F_2 \text{ the final states of } \cA_{\varphi_2}. 	\end{aligned}$$
 	
 	
 	The transition relation $\Dstarts$ is formally defined as:
 	
-	\Fernando{dejar todos estrictos}
-	$$\begin{aligned}[t] 		\Dstarts & = \Delta_2\\ 		& \uplus \{((q, p, b), P_1 \land P_2, L_1 \cup L_2, (q', p', 1)) \mid (q, P_1, L_1, q') \in \Delta_1 \land (p, P_2, L_2, p') \in \Delta_2 \land b \in \{0, 1\}\} \\ 		& \uplus \{((q, p, b), \epsilon, (q', p, b)) \mid (q, \epsilon, q') \in \Delta_1 \land p \in Q_2 \land b \in \{0, 1\}\}  \\ 		& \uplus \{((q, p, b), \epsilon, (q, p', b)) \mid q \in Q_1 \land (p, \epsilon, p') \in \Delta_2 \land b \in \{0, 1\}\}  \\ 		& \uplus \{((q, p, 1), \epsilon, p) \mid q \in F_1 \land p \in Q_2\} 	\end{aligned}$$
+	$$\begin{aligned}[t] 		
+		\Dstarts 
+		& = \Delta_2\\ 		
+		& \uplus \{((q, p, b), P_1 \land P_2, L_1 \cup L_2, (q', p', 1)) \mid (q, P_1, L_1, q') \in \Delta_1 \land (p, P_2, L_2, p') \in \Delta_2 \land b \in \{0, 1\}\} \\ 		
+		& \uplus \{((q, p, b), \epsilon, (q', p, b)) \mid (q, \epsilon, q') \in \Delta_1 \land p \in Q_2 \land b \in \{0, 1\}\}  \\ 		
+		& \uplus \{((q, p, b), \epsilon, (q, p', b)) \mid q \in Q_1 \land (p, \epsilon, p') \in \Delta_2 \land b \in \{0, 1\}\}  \\ 		
+		& \uplus \{((q, p, 1), \epsilon, p) \mid q \in F_1 \land p \in Q_2\} 	\end{aligned}$$
 	
 	Intuitively, given a stream $\Stream$, we evaluate $\varphi_1$ and $\varphi_2$ simultaneously from the beginning. At some point when $\varphi_1$ reaches a final state (ensuring at least one joint event was consumed), we transition out of the product phase and continue evaluating only $\varphi_2$ until it reaches its own final state.
 	

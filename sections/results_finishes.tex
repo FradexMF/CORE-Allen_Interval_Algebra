@@ -1,0 +1,69 @@
+% !TeX spellcheck = en_GB
+%!TEX root = ../main/main.tex
+In this section we introduce an extension to the semantics of CEL, namely we introduce a new operator using \textit{Allen interval algebra} \textit{finishes}. 
+We then extend the formal computational model for evaluating CEL formulas and prove its correctness. 
+
+We present then the \emph{finishes operator} for CEL with the following definition:
+
+$$\begin{aligned} 	
+	\sem{\varphi_1 \finishes \varphi_2}(\Stream) 	
+	&= \{C_1 \cup C_2 \mid C_1 \in \sem{\varphi_1}(\Stream)  	
+	\land C_2 \in \sem{\varphi_2}(\Stream) \\ 	
+	&\quad \land \cstart(C_2) \leq \cstart(C_1) \land \cend(C_1) = \cend(C_2)\} 
+\end{aligned}$$
+
+\begin{example} Suppose we have a system tracking batch processes, specifically tracking the beginning of a database backup ($B$), a data validation step ($V$), and a final completion signal ($D$). Consider a stream $\Stream = e_1 e_2 e_3$ where the event types are $\type(e_1) = B$, $\type(e_2) = V$, and $\type(e_3) = D$.
+	
+	Let $\varphi_2 = B ; D$ be a formula detecting the entire backup process from start to finish, and $\varphi_1 = V ; D$ be a formula detecting the validation phase that must conclude the process.
+	\begin{itemize}
+		\item The set $\sem{\varphi_2}(\Stream)$ contains a complex event $C_2$ representing the full backup sequence at positions $1$ and $3$, with $\cinterval(C_2) = [1..3]$. Thus, $\cstart(C_2) = 1$ and $\cend(C_2) = 3$.
+		\item The set $\sem{\varphi_1}(\Stream)$ contains a complex event $C_1$ representing the validation sequence at positions $2$ and $3$, with $\cinterval(C_1) = [2..3]$. Thus, $\cstart(C_1) = 2$ and $\cend(C_1) = 3$.
+	\end{itemize}
+	
+	Since the finishes condition $\cstart(C_2) \leq \cstart(C_1)$ and $\cend(C_1) = \cend(C_2)$ holds (i.e., $1 \leq 2$ and $3 = 3$), the complex event $C = C_1 \cup C_2$ is in the result of $\sem{\varphi_1 \finishes \varphi_2}(\Stream)$. This resulting complex event captures a scenario where the validation phase started after the backup had already begun, but both tasks finished simultaneously on the exact same completion signal.
+	
+\end{example}
+
+We denote by $\celplus{\finishessimb}$ the \emph{extension of CEL} with the finishes operation. We can prove the following result:
+
+\begin{theorem} \label{theo:CELfinishes}
+	For every $\celplus{\finishessimb}$ formula $\varphi$ there exists a CEA $\cA_\varphi$ such that $\sem{\varphi}(\Stream) = \sem{\cA_\varphi}(\Stream)$ for every stream $\Stream$.
+\end{theorem}
+
+\begin{proof}
+	We already know that for every (standard) CEL operator we can construct an equivalent CEA. So, we concentrate next in the construction of a CEA for the finishes operator.
+	Let $\varphi_1$ and $\varphi_2$ be formulas in CEL extended with the finishes operator. We show by induction that there exists a CEA $\cAfinishes$ such that:
+	
+	$$\sem{\varphi_1 \finishes \varphi_2}(\Stream) = \sem{\cAfinishes}(\Stream)$$
+	
+	Assume then that there exist CEAs that satisfy the previous property for $\varphi_1$ and $\varphi_2$, called $\cA_{\varphi_1} = (Q_1, \SETP_1, \SETX_1, \Delta_1, q_0, F_1)$ and $\cA_{\varphi_2} = (Q_2, \SETP_2, \SETX_2, \Delta_2, p_0, F_2)$, respectively. 
+	Then the construction for the finishes operator is as follows.
+	Let $\cAfinishes$ be a CEA where $\cAfinishes = (\Qfinishes, \Pfinishes, \Xfinishes, \Dfinishes, I_{\finishes}, F_{\finishes})$:
+	
+	$$\begin{aligned}[t] 		 		
+		& \Qfinishes = Q_2 \uplus (Q_1 \times Q_2 \times \{0, 1\}) \\ 		 		
+		& \Pfinishes = \SETP_2 \cup \{ P_1 \land P_2 \mid P_1 \in \SETP_1 \land P_2 \in \SETP_2 \} \hspace*{155px}\\ 		 		
+		& \Xfinishes  = \SETX_1 \cup \SETX_2 \\ 		 		
+		& I_{\finishes} = p_0\\ 		 		
+		& F_{\finishes} = \{ (q, p, 1) \mid q \in F_1 \land p \in F_2 \}. 	 	
+	\end{aligned}$$
+	
+	The transition relation $\Dfinishes$ is formally defined as:
+	
+	$$\begin{aligned}[t] 		 		
+		\Dfinishes 
+		& = \Delta_2 \\ 		 		
+		& \uplus \{(p, \epsilon, (q_0, p, 0)) \mid p \in Q_2\}\\
+		& \uplus \{((q, p, b), \epsilon, (q', p, b)) \mid (q, \epsilon, q') \in \Delta_1 \land p \in Q_2 \land b \in \{0, 1\}\}  \\ 		 		
+		& \uplus \{((q, p, b), \epsilon, (q, p', b)) \mid q \in Q_1 \land (p, \epsilon, p') \in \Delta_2 \land b \in \{0, 1\}\}  \\ 		 		
+		& \uplus \{((q, p, b), P_1 \land P_2, L_1 \cup L_2, (q', p', 1)) \mid (q, P_1, L_1, q') \in \Delta_1 \land (p, P_2, L_2, p') \in \Delta_2 \land b \in \{0, 1\}\} 
+	\end{aligned}$$
+	
+	Intuitively, given a stream $\Stream$, $\cAfinishes$ first evaluates $\varphi_2$ alone since $\cstart(C_2) \leq \cstart(C_1)$. At any point during its execution, it can transition via an $\epsilon$-transition to run both automatons simultaneously, simulating the start of $\varphi_1$. The automaton only accepts if both $\cA_{\varphi_1}$ and $\cA_{\varphi_2}$ finish simultaneously and there has been at least one event consumed by both.
+	
+	Next, we prove that the construction is correct, namely, $\sem{\varphi_1 \finishes \varphi_2}(\Stream) = \sem{\cAfinishes}(\Stream)$ for every stream $\Stream$. The proof is by double containment.
+	
+	\paragraph{$\sem{\varphi_1 \finishes \varphi_2}(\Stream) \subseteq \sem{\cAfinishes}(\Stream)$}
+	
+	\paragraph{$\sem{\cAfinishes}(\Stream) \subseteq \sem{\varphi_1 \finishes \varphi_2}(\Stream)$}
+\end{proof}
