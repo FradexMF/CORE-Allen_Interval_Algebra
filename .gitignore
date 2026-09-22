@@ -5,7 +5,6 @@
 *.vtc
 *.fdb_latexmk
 *.aux
-main.*
 *.bbl
 *.blg
 *.DS_STORE
